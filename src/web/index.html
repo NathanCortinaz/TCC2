@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>File Tracker</title>
+    <link rel="icon" type="favicon/png" href="./favicon.ico" />
+    <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+    <script type="text/javascript" src="./eel.js"></script>
+    <script type="text/javascript" src="./index.js"></script>
+  </head>
+
+  <body onLoad="verificaModificacoes()">
+    <div class="wrapper">
+      <!-- <button onclick="seletor();">Adicionar arquivo</button> -->
+      <div class="buttonBox">
+        <button class="adicionarArquivo" onclick="adicionarArquivo();">Adicionar arquivo</button>
+      </div>
+      <div class="buttonBox">
+        <button class="excluirArquivo" onclick="excluirArquivo();">Exluir arquivo</button>
+      </div>
+      <div class="buttonBox">
+        <button class="definirEmail" onclick="definirEmail();">Definir e-mail</button>
+      </div>
+      <div class="listTitle">Arquivos monitorados</div>
+      <div class="listBox">
+        <ul id="arquivosMonitorados">
+          <li>Clique em "Adicionar arquivo" para monitorá-lo</li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
