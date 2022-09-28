@@ -10,22 +10,21 @@
     <script type="text/javascript" src="./index.js"></script>
   </head>
 
-  <body onLoad="verificaModificacoes()">
+  <body onLoad="">
     <div class="wrapper">
-      <!-- <button onclick="seletor();">Adicionar arquivo</button> -->
       <div class="buttonBox">
-        <button class="adicionarArquivo" onclick="adicionarArquivo();">Adicionar arquivo</button>
+        <button class="botaoIniciarAnalise" onclick=";">Iniciar análise</button>
       </div>
       <div class="buttonBox">
-        <button class="excluirArquivo" onclick="excluirArquivo();">Exluir arquivo</button>
+        <button class="botaoDebugar" onclick="debugButton();">Debugar</button>
       </div>
       <div class="buttonBox">
-        <button class="definirEmail" onclick="definirEmail();">Definir e-mail</button>
+        <button class="botaoAbrirPainel" onclick=";">Abrir painel</button>
       </div>
-      <div class="listTitle">Arquivos monitorados</div>
+      <div class="listTitle">Monitor</div>
       <div class="listBox">
         <ul id="arquivosMonitorados">
-          <li>Clique em "Adicionar arquivo" para monitorá-lo</li>
+          <li>Selecione uma ação acima</li>
         </ul>
       </div>
     </div>
