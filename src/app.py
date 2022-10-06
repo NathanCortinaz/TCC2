@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 from distutils.log import debug
 import eel
 import os
-import threading
 
 # bibliotecas para análise facial
 from deepface import DeepFace
@@ -12,11 +11,11 @@ import pandas as pd
 import cv2
 
 # biblioteca para acessar explorador de arquivo
-import tkinter as tk
-from tkinter import filedialog
+import subprocess
 
 # definição do caminho frontend
 eel.init(f'{os.path.dirname(os.path.realpath(__file__))}/web')
+path = f'{os.path.dirname(os.path.realpath(__file__))}\Results'
 
 
 class FaceAnalyzer():
@@ -71,13 +70,7 @@ class FaceAnalyzer():
             capture.release()
             cv2.destroyAllWindows()
             results = pd.DataFrame(self.reactions)
-            results.to_excel("Results.xlsx", sheet_name='Detected Expresions')
-            # thread_debug.join()
-            exit()
-
-    # @ eel.expose
-    # def create_debug_thread():
-    #     thread_debug.start()
+            results.to_excel(f"{path}/Results.xlsx", sheet_name='Detected Expresions')
 
     def debug(self):
         '''Starts debug mode'''
@@ -88,10 +81,14 @@ class FaceAnalyzer():
             self.check_stop()
             sleep(0.1)
 
+    def open_results(self):
+        '''Open the folder containing the results files'''
+        subprocess.Popen(f'explorer "{path}"')
+
 
 capture = cv2.VideoCapture(0)
 fa = FaceAnalyzer(capture)
 eel.expose(fa.debug)
-# thread_debug = threading.Thread(target=fa.debug, name="Debug")
+eel.expose(fa.open_results)
 
 eel.start('index.html', size=(720, 385))
