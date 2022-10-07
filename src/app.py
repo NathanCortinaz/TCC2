@@ -1,6 +1,7 @@
 # bibliotecas para interface front e backend
 from __future__ import unicode_literals
 from distutils.log import debug
+from tempfile import SpooledTemporaryFile
 import eel
 import os
 
@@ -67,28 +68,42 @@ class FaceAnalyzer():
         exitApp = cv2.waitKey(1) & 0xFF == ord(self.exit_character)
         if exitApp:
             print(f'{self.reactions = }')
-            capture.release()
-            cv2.destroyAllWindows()
             results = pd.DataFrame(self.reactions)
             results.to_excel(f"{path}/Results.xlsx", sheet_name='Detected Expresions')
-
-    def debug(self):
-        '''Starts debug mode'''
-        while True:
-            self.detect_reaction()
-            self.show_faces()
-            self.check_reaction()
-            self.check_stop()
-            sleep(0.1)
-
-    def open_results(self):
-        '''Open the folder containing the results files'''
-        subprocess.Popen(f'explorer "{path}"')
+            return True
 
 
-capture = cv2.VideoCapture(0)
-fa = FaceAnalyzer(capture)
-eel.expose(fa.debug)
-eel.expose(fa.open_results)
+def start(debug_mode):
+    '''Starts debug mode'''
+    capture = cv2.VideoCapture(0)
+    fa = FaceAnalyzer(capture)
+    while True:
+        fa.detect_reaction()
+        if debug_mode == True:
+            fa.show_faces()
+        fa.check_reaction()
+        stop_running = fa.check_stop()
+        if stop_running == True:
+            break
+        sleep(0.1)
+    capture.release()
+    cv2.destroyAllWindows()
+
+
+@eel.expose
+def run():
+    start(debug_mode=False)
+
+
+@eel.expose
+def debug():
+    start(debug_mode=True)
+
+
+@eel.expose
+def open_results():
+    '''Open the folder containing the results files'''
+    subprocess.Popen(f'explorer "{path}"')
+
 
 eel.start('index.html', size=(720, 385))

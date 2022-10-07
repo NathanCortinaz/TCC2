@@ -1,6 +1,11 @@
+async function runButton() {
+  await eel.run()();
+  alert('Análise registrada.');
+}
+
 async function debugButton() {
   await eel.debug()();
-  alert('Debugando...');
+  alert('Análise registrada.');
 }
 
 async function openResults() {
