@@ -65,7 +65,9 @@ class FaceAnalyzer():
 
     def check_stop(self):
         '''Check if user wants to stop and save reactions to file'''
-        exitApp = cv2.waitKey(1) & 0xFF == ord(self.exit_character)
+        # exitApp = cv2.waitKey(1) & 0xFF == ord(self.exit_character)
+        exitApp = eel.checkRunButton()()
+        print(exitApp)
         if exitApp:
             print(f'{self.reactions = }')
             results = pd.DataFrame(self.reactions)
