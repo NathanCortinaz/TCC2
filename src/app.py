@@ -54,7 +54,9 @@ class FaceAnalyzer():
                 cv2.rectangle(self.frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
                 cv2.putText(self.frame, self.new_reaction, (x, y-10),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_4)
+            cv2.startWindowThread()
             cv2.imshow('FaceAnalyzer', self.frame)
+            cv2.waitKey(1)
 
     def check_reaction(self):
         '''Check if there is a new reaction and append it to reactions list'''
@@ -63,11 +65,13 @@ class FaceAnalyzer():
             running_time = perf_counter() - self.start
             self.reactions.append((self.new_reaction, running_time))
 
-    def check_stop(self):
+    def check_stop(self, debug_mode):
         '''Check if user wants to stop and save reactions to file'''
         # exitApp = cv2.waitKey(1) & 0xFF == ord(self.exit_character)
-        exitApp = eel.checkRunButton()()
-        print(exitApp)
+        if debug_mode == True:
+            exitApp = eel.checkDebugButton()()
+        else:
+            exitApp = eel.checkRunButton()()
         if exitApp:
             print(f'{self.reactions = }')
             results = pd.DataFrame(self.reactions)
@@ -84,7 +88,7 @@ def start(debug_mode):
         if debug_mode == True:
             fa.show_faces()
         fa.check_reaction()
-        stop_running = fa.check_stop()
+        stop_running = fa.check_stop(debug_mode)
         if stop_running == True:
             break
         sleep(0.1)
@@ -108,4 +112,4 @@ def open_results():
     subprocess.Popen(f'explorer "{path}"')
 
 
-eel.start('index.html', size=(720, 385))
+eel.start('index.html', size=(520, 235))
