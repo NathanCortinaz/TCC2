@@ -16,6 +16,10 @@ import subprocess
 
 # bibliotecas para gráficos
 import collections
+import matplotlib.pyplot as plt
+from openpyxl import load_workbook
+import openpyxl
+import numpy
 
 # definição do caminho frontend
 eel.init(f'{os.path.dirname(os.path.realpath(__file__))}/web')
@@ -82,13 +86,15 @@ class FaceAnalyzer():
         if exitApp:
             running_time = perf_counter() - self.start
             self.reactions.append((self.current_reaction, running_time))
+            self.translate_reactions()
             self.create_step_reactions_list()
             self.create_frequency_list()
+            self.save_to_excel()
             print(f'\n{self.reactions = }')
             print(f'\n{self.reactions_step = }')
             print(f'\n{self.sorted_frequency_list = }')
-            results = pd.DataFrame(self.reactions)
-            results.to_excel(f"{path}/Results.xlsx", sheet_name='Expressões detectadas')
+            # results = pd.DataFrame(self.reactions)
+            # results.to_excel(f"{path}/Results.xlsx", sheet_name='Expressões detectadas')
             return True
 
     def create_step_reactions_list(self):
@@ -109,6 +115,88 @@ class FaceAnalyzer():
         reactions_list = [reaction[0] for reaction in self.reactions_step]
         frequency_list = list(collections.Counter(reactions_list).items())
         self.sorted_frequency_list = sorted(frequency_list, key=lambda x: (-x[1], x[0]))
+
+    def translate_reactions(self):
+        '''Traduz lista de reações'''
+
+        for index, reaction in enumerate(self.reactions):
+            item = list(reaction)
+            match item[0]:
+                case 'neutral':
+                    item[0] = 'neutro'
+                case 'happy':
+                    item[0] = 'feliz'
+                case 'fear':
+                    item[0] = 'medo'
+                case 'angry':
+                    item[0] = 'raiva'
+                case 'sad':
+                    item[0] = 'triste'
+                case 'disgust':
+                    item[0] = 'desgosto'
+                case 'surprise':
+                    item[0] = 'surpresa'
+            self.reactions[index] = tuple(item)
+
+    def save_to_excel(self):
+        '''Gera gráficos e salva junto com dados em Excel'''
+
+        df1 = pd.DataFrame(self.reactions_step)
+        x1 = df1[1]
+        y1 = df1[0]
+        df2 = pd.DataFrame(self.sorted_frequency_list)
+        x2 = df2[0]
+        y2 = df2[1]
+
+        fig = plt.figure()
+        fig = plt.figure(figsize=(len(self.reactions_step)/6, 5))
+        ax = fig.gca()
+        plt.plot(x1, y1, linewidth=2, markersize=1)
+        plt.ylabel('Reação', fontweight='bold')
+        plt.xlabel('Tempo [s]', fontweight='bold')
+        ax.set_xticks(numpy.arange(0, self.reactions_step[-1][1]+2, 2))
+        plt.grid(linestyle=':')
+        plt.tight_layout()
+        plt.savefig("GraficoLinhas.png")
+        plt.clf()
+
+        plt.figure()
+        plt.bar(x2, y2)
+        plt.xlabel('Reação', fontweight='bold')
+        plt.ylabel('Tempo [s]', fontweight='bold')
+        for i in range(len(x2)):
+            plt.text(i, y2[i], y2[i], ha='center')
+        plt.tight_layout()
+        plt.savefig("GraficoBarras.png")
+        plt.clf()
+
+        wb = openpyxl.Workbook()
+
+        sheet = wb.active
+        sheet.title = "Emoções por segundo"
+        sheet.cell(1, 1).value = "REAÇÃO"
+        sheet.cell(1, 2).value = "TEMPO [s]"
+        for item in self.reactions_step:
+            sheet.append(item)
+        grafico_linhas = openpyxl.drawing.image.Image("GraficoLinhas.png")
+        grafico_linhas.anchor = 'D1'
+        sheet.add_image(grafico_linhas)
+
+        sheet = wb.create_sheet()
+        sheet.title = 'Ranking de reações'
+        sheet.cell(1, 1).value = "REAÇÃO"
+        sheet.cell(1, 2).value = "TEMPO [s]"
+        for item in self.sorted_frequency_list:
+            sheet.append(item)
+        grafico_barras = openpyxl.drawing.image.Image("GraficoBarras.png")
+        grafico_barras.anchor = 'D1'
+        sheet.add_image(grafico_barras)
+
+        wb.save(f"{path}/Results.xlsx")
+        wb.close
+
+        os.remove("GraficoLinhas.png")
+        os.remove("GraficoBarras.png")
 
 
 def start(debug_mode):
