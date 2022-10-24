@@ -6,7 +6,7 @@ import eel
 import os
 
 # bibliotecas para análise facial
-from deepface import DeepFace
+from fer import FER
 from time import sleep, perf_counter
 import pandas as pd
 import cv2
@@ -39,6 +39,7 @@ class FaceAnalyzer():
             self.reactions = [(self.current_reaction, 0)]
             self.reactions_step = []
             self.sorted_frequency_list = []
+            self.detector = FER()
             self.faceCascade = cv2.CascadeClassifier(
                 cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
@@ -47,9 +48,10 @@ class FaceAnalyzer():
 
         try:
             success, self.frame = self.capture.read()
-            predictions = DeepFace.analyze(self.frame, actions=['emotion'])
-            self.new_reaction = predictions["dominant_emotion"]
-            print(self.new_reaction)
+            reaction, score = self.detector.top_emotion(self.frame)
+            if reaction != None:
+                self.new_reaction = reaction
+            print(f'{self.new_reaction=}')
             self.face_found = True
         except:
             print("Face not detected...")
@@ -89,10 +91,10 @@ class FaceAnalyzer():
             self.translate_reactions()
             self.create_step_reactions_list()
             self.create_frequency_list()
-            self.save_to_excel()
             print(f'\n{self.reactions = }')
             print(f'\n{self.reactions_step = }')
             print(f'\n{self.sorted_frequency_list = }')
+            self.save_to_excel()
             # results = pd.DataFrame(self.reactions)
             # results.to_excel(f"{path}/Results.xlsx", sheet_name='Expressões detectadas')
             return True
@@ -148,10 +150,12 @@ class FaceAnalyzer():
         x2 = df2[0]
         y2 = df2[1]
 
+        width = 5 if len(self.reactions_step)/6 < 5 else len(self.reactions_step)/6
+
         fig = plt.figure()
-        fig = plt.figure(figsize=(len(self.reactions_step)/6, 5))
+        fig = plt.figure(figsize=(width, 5))
         ax = fig.gca()
-        plt.plot(x1, y1, linewidth=2, markersize=1)
+        plt.plot(x1, y1, linewidth=2, marker=".", markersize=10)
         plt.ylabel('Reação', fontweight='bold')
         plt.xlabel('Tempo [s]', fontweight='bold')
         ax.set_xticks(numpy.arange(0, self.reactions_step[-1][1]+2, 2))
