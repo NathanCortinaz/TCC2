@@ -82,7 +82,7 @@ button:active {
   background: linear-gradient(45deg, rgba(32, 56, 100, 1) 0%, rgba(90, 115, 151, 1) 50%, rgba(100, 200, 210, 1) 100%);
 }
 
-.botaoDebugar {
+.botaoDepurar {
   background: rgb(197, 90, 17);
   background: linear-gradient(45deg, rgba(197, 90, 17, 1) 0%, rgba(173, 7, 126, 1) 100%);
 }

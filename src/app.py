@@ -30,7 +30,8 @@ class FaceAnalyzer():
     def __init__(self, capture):
         self.capture = capture
         if not self.capture.isOpened():
-            raise IOError("Não foi possível acessar webcam")
+            eel.camError()()
+            exit()
         else:
             self.start = perf_counter()
             self.current_reaction = 'neutral'
@@ -46,16 +47,15 @@ class FaceAnalyzer():
     def detect_reaction(self):
         '''Verifica video da webcam buscando por expressões faciais'''
 
-        try:
-            success, self.frame = self.capture.read()
-            reaction, score = self.detector.top_emotion(self.frame)
-            if reaction != None:
-                self.new_reaction = reaction
-            print(f'{self.new_reaction=}')
+        success, self.frame = self.capture.read()
+        reaction, score = self.detector.top_emotion(self.frame)
+        if reaction != None:
+            self.new_reaction = reaction
             self.face_found = True
-        except:
+        else:
             print("Face not detected...")
             self.face_found = False
+        print(f'{self.new_reaction=}')
 
     def show_faces(self):
         '''Exibe faces detectadas na webcam com suas expressões'''
@@ -67,7 +67,7 @@ class FaceAnalyzer():
                 cv2.putText(self.frame, self.new_reaction, (x, y-10),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_4)
             cv2.startWindowThread()
-            cv2.imshow('FaceAnalyzer', self.frame)
+            cv2.imshow('Analisador de Expressões', self.frame)
             cv2.waitKey(1)
 
     def check_reaction(self):
@@ -95,8 +95,6 @@ class FaceAnalyzer():
             print(f'\n{self.reactions_step = }')
             print(f'\n{self.sorted_frequency_list = }')
             self.save_to_excel()
-            # results = pd.DataFrame(self.reactions)
-            # results.to_excel(f"{path}/Results.xlsx", sheet_name='Expressões detectadas')
             return True
 
     def create_step_reactions_list(self):
@@ -204,10 +202,11 @@ class FaceAnalyzer():
 
 
 def start(debug_mode):
-    '''Inicia modo debug'''
+    '''Inicia aplicação'''
 
     capture = cv2.VideoCapture(0)
     fa = FaceAnalyzer(capture)
+    os.system('cls' if os.name == 'nt' else 'clear')
     while True:
         fa.detect_reaction()
         if debug_mode == True:
@@ -238,4 +237,5 @@ def open_results():
     subprocess.Popen(f'explorer "{path}"')
 
 
-eel.start('index.html', size=(620, 235))
+os.system('cls' if os.name == 'nt' else 'clear')
+eel.start('index.html', size=(720, 235))
