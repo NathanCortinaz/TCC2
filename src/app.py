@@ -34,8 +34,8 @@ class FaceAnalyzer():
             exit()
         else:
             self.start = perf_counter()
-            self.current_reaction = 'neutral'
-            self.new_reaction = 'neutral'
+            self.current_reaction = 'neutro'
+            self.new_reaction = 'neutro'
             self.face_found = False
             self.reactions = [(self.current_reaction, 0)]
             self.reactions_step = []
@@ -50,10 +50,11 @@ class FaceAnalyzer():
         success, self.frame = self.capture.read()
         reaction, score = self.detector.top_emotion(self.frame)
         if reaction != None:
+            reaction = self.translate_reactions(reaction)
             self.new_reaction = reaction
             self.face_found = True
         else:
-            print("Face not detected...")
+            print("Face não identificada...")
             self.face_found = False
         print(f'{self.new_reaction=}')
 
@@ -74,6 +75,7 @@ class FaceAnalyzer():
         '''Verifica se há nova reação e adiciona à lista de reações'''
 
         if self.new_reaction != self.current_reaction:
+
             self.current_reaction = self.new_reaction
             running_time = perf_counter() - self.start
             self.reactions.append((self.new_reaction, running_time))
@@ -88,7 +90,6 @@ class FaceAnalyzer():
         if exitApp:
             running_time = perf_counter() - self.start
             self.reactions.append((self.current_reaction, running_time))
-            self.translate_reactions()
             self.create_step_reactions_list()
             self.create_frequency_list()
             print(f'\n{self.reactions = }')
@@ -116,27 +117,24 @@ class FaceAnalyzer():
         frequency_list = list(collections.Counter(reactions_list).items())
         self.sorted_frequency_list = sorted(frequency_list, key=lambda x: (-x[1], x[0]))
 
-    def translate_reactions(self):
+    def translate_reactions(self, reaction):
         '''Traduz lista de reações'''
-
-        for index, reaction in enumerate(self.reactions):
-            item = list(reaction)
-            match item[0]:
-                case 'neutral':
-                    item[0] = 'neutro'
-                case 'happy':
-                    item[0] = 'feliz'
-                case 'fear':
-                    item[0] = 'medo'
-                case 'angry':
-                    item[0] = 'raiva'
-                case 'sad':
-                    item[0] = 'triste'
-                case 'disgust':
-                    item[0] = 'desgosto'
-                case 'surprise':
-                    item[0] = 'surpresa'
-            self.reactions[index] = tuple(item)
+        match reaction:
+            case 'neutral':
+                reaction = 'neutro'
+            case 'happy':
+                reaction = 'feliz'
+            case 'fear':
+                reaction = 'medo'
+            case 'angry':
+                reaction = 'raiva'
+            case 'sad':
+                reaction = 'triste'
+            case 'disgust':
+                reaction = 'desgosto'
+            case 'surprise':
+                reaction = 'surpresa'
+        return reaction
 
     def save_to_excel(self):
         '''Gera gráficos e salva junto com dados em Excel'''
@@ -194,7 +192,7 @@ class FaceAnalyzer():
         grafico_barras.anchor = 'D1'
         sheet.add_image(grafico_barras)
 
-        wb.save(f"{path}/Results.xlsx")
+        wb.save(f"{path}/Resultados.xlsx")
         wb.close
 
         os.remove("GraficoLinhas.png")
